@@ -1,4 +1,4 @@
-﻿ <!-- Task Modal -->
+﻿<!-- Task Modal -->
 <div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -22,12 +22,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModal()">Close</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveTask()">Save Task</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="SaveButton">Save Task</button>
             </div>
         </div>
     </div>
 </div>
-
 
 <section>
     <div id="taskContextMenu" class="context-menu">
@@ -42,21 +41,17 @@
     <div class="container mt-3">
         <h2>Task List</h2>
         <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#taskModal">Add Task</button>
-    </div>
-
-    <!-- Placeholder for Task Display -->
-    <div id="taskList">
-        <!-- Tasks would be dynamically loaded here -->
+        <!-- Placeholder for Task Display -->
         <div class="container mt-2">
-            <table class="table">
+            <table id="taskDataTable" class="display">
                 <thead>
                     <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">#</th>
-                        <th scope="col">#</th>
-                        <th scope="col">Constents</th>
-                        <th scope="col">File Name</th>
-                        <th scope="col">Date</th>
+                        <th>Action</th>
+                        <th>Select</th>
+                        <th>Icon</th>
+                        <th>Task Name</th>
+                        <th>File Name</th>
+                        <th>Edit/Delete</th>
                     </tr>
                 </thead>
                 <tbody id="taskTable">
@@ -65,97 +60,114 @@
             </table>
         </div>
     </div>
+</section>
+
+@section Scripts{
     <script>
-
-
-        function saveTask() {
-            var taskName = document.getElementById('taskName').value;
-            var taskDescription = document.getElementById('FileName').value;
-            // Add task to table
-            var table = document.getElementById('taskTable');
-            var row = table.insertRow();
-            var cell1 = row.insertCell(0);
-            var cell2 = row.insertCell(1);
-            var cell3 = row.insertCell(2);
-            var cell4 = row.insertCell(3);
-            var cell5 = row.insertCell(4);
-            var cell6 = row.insertCell(5);
-            cell1.innerHTML = '<i class="fa fa-long-arrow-down text-primary" aria-hidden="true"></i>';
-            cell2.innerHTML = '<input type="checkbox"/>';
-            cell3.innerHTML = '<i class="fa fa-user-o text-danger" aria-hidden="true"></i>';
-            cell4.innerHTML = taskName;
-            cell5.innerHTML = taskDescription;
-            cell6.innerHTML = '<button class="btn btn-info" onclick="editTask(this)">Edit</button> ' +
-                '<button class="btn btn-danger" onclick="deleteTask(this)">Delete</button>';
-            // Clear inputs
-            $('#taskModal').modal('hide');
-            document.getElementById('taskForm').reset();
-        }
-
-        function editTask(button) {
-            var row = button.parentNode.parentNode;
-            var taskName = row.cells[3].innerHTML;
-            document.getElementById('taskName').value = taskName;
-            $('#taskModal').modal('show');
-            // Save changes
-            $('#taskModal').one('hide.bs.modal', function () {
-                row.cells[3].innerHTML = document.getElementById('taskName').value;
-            });
-        }
-
-        function deleteTask(button) {
-            if (confirm('Are you sure you want to delete this task?')) {
-                var row = button.parentNode.parentNode;
-                row.parentNode.removeChild(row);
-            }
-        }
 
         function closeModal(){
             $('#taskModal').modal('hide');
         }
 
-
         $(document).ready(function () {
-            var $contextMenu = $('#taskContextMenu');
+            var table = $('#taskDataTable').DataTable();
 
-            // Simulate a right-click on a task to show the context menu
-            $(document).on("contextmenu", "#taskList", function (e) {
-                e.preventDefault();
-                $contextMenu.css({
-                    display: "block",
-                    left: e.pageX,
-                    top: e.pageY
+            function saveTask() {
+                var taskName = $('#taskName').val();
+                var taskDescription = $('#FileName').val();
+                // Add task to table
+                table.row.add([
+                    '<i class="fa fa-long-arrow-down text-primary" aria-hidden="true"></i>',
+                    '<input type="checkbox" id="check-input" id="checkbox-id"/>',
+                    '<i class="fa fa-user-o text-danger" aria-hidden="true"></i>',
+                    taskName,
+                    taskDescription,
+                    '<button class="btn btn-info" id="edit-task">Edit</button> ' +
+                    '<button class="btn btn-danger" id="delete-task">Delete</button>'
+                ]).draw(false);
+                // Clear inputs and hide modal
+                $('#taskModal').modal('hide');
+                document.getElementById('taskForm').reset();
+            }
+
+            function deleteTask(button) {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    var row = table.row($(button).parents('tr'));
+                    row.remove().draw();
+                }
+            }
+
+            $('#SaveButton').on('click', saveTask);
+
+            $(document).on('click', '#edit-task', function () {
+                var button = this;
+                var row = table.row($(button).parents('tr'));
+                var rowData = row.data();
+                $('#taskName').val(rowData[3]);
+                $('#taskModal').modal('show');
+                $('#taskModal').one('hide.bs.modal', function () {
+                    rowData[3] = $('#taskName').val();
+                    row.data(rowData).draw();
                 });
             });
 
-            // Hide context menu on click elsewhere
-            $(document).on("click", function () {
-                $contextMenu.hide();
+
+            $(document).on('click', '#delete-task', function () {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    var row = table.row($(this).parents('tr'));
+                    row.remove().draw();
+                }
             });
 
-            // Task operations
-            $('#openTask').click(function () {
-                alert('Open Task clicked');
-                $contextMenu.hide();
+
+            $(document).on('change', '#check-input', function () {
+                const checkbox = $(this);
+                const isChecked = checkbox.prop('checked');
+                const tr = checkbox.closest('tr');
+                if(isChecked){
+                    tr.addClass('strikeout');
+                    tr.addClass('text-muted');
+                }else{
+                    tr.removeClass('strikeout');
+                    tr.removeClass('text-muted');
+                }
             });
 
-            $('#editTask').click(function () {
-                alert('Edit Task clicked');
-                $contextMenu.hide();
+            function checkboxHandler(){
+                const button = $(this);
+                console.log(button);
+                console.log(button.checked);
+            };
+
+            $('#checkbox-id').on('change', checkboxHandler);
+
+            $('#taskDataTable tbody').on("contextmenu", "tr", function (e) {
+                e.preventDefault(); 
+                const tr = $(this);
+                const trC = $(this)[0].children;
+                console.log(tr);
+                $('#taskContextMenu').css({
+                    display: "block", 
+                    left: e.pageX + 'px', 
+                    top: e.pageY + 'px' 
+                });
             });
 
-            $('#printTask').click(function () {
-                alert('Print Task clicked');
-                $contextMenu.hide();
-            });
-
+            // Task operations through context menu
+            $('#openTask').click(function () { alert('Open Task clicked'); });
+            $('#editTask').click(function () { alert('Edit Task clicked'); });
+            $('#printTask').click(function () { alert('Print Task clicked'); });
             $('#deleteTask').click(function () {
                 if (confirm('Are you sure you want to delete this task?')) {
                     alert('Task deleted');
                 }
-                $contextMenu.hide();
+            });
+
+            $(document).on("click", function () {
+                $('#taskContextMenu').hide();
             });
         });
-
     </script>
-</section>
+}
+
+

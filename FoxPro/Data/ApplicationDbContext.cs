@@ -9,4 +9,5 @@ public class ApplicationDbContext: DbContext
     {
 
     }
+    public DbSet<Models.Task> Tasks { get; set; }  
 }

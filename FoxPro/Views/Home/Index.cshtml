@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="taskModalLabel">Task Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -15,13 +15,13 @@
                         <input type="text" class="form-control" id="taskName" required>
                     </div>
                     <div class="form-group">
-                        <label for="taskDescription">Description</label>
-                        <textarea class="form-control" id="taskDescription" rows="3"></textarea>
+                        <label for="FileName">File Name</label>
+                        <input type="file" class="form-control" id="FileName" />
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModal()">Close</button>
                 <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveTask()">Save Task</button>
             </div>
         </div>
@@ -52,9 +52,11 @@
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col">Task</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Actions</th>
+                        <th scope="col">#</th>
+                        <th scope="col">#</th>
+                        <th scope="col">Constents</th>
+                        <th scope="col">File Name</th>
+                        <th scope="col">Date</th>
                     </tr>
                 </thead>
                 <tbody id="taskTable">
@@ -68,7 +70,7 @@
 
         function saveTask() {
             var taskName = document.getElementById('taskName').value;
-            var taskDescription = document.getElementById('taskDescription').value;
+            var taskDescription = document.getElementById('FileName').value;
             // Add task to table
             var table = document.getElementById('taskTable');
             var row = table.insertRow();
@@ -76,10 +78,14 @@
             var cell2 = row.insertCell(1);
             var cell3 = row.insertCell(2);
             var cell4 = row.insertCell(3);
-            cell1.innerHTML = table.rows.length;
-            cell2.innerHTML = taskName;
-            cell3.innerHTML = taskDescription;
-            cell4.innerHTML = '<button class="btn btn-info" onclick="editTask(this)">Edit</button> ' +
+            var cell5 = row.insertCell(4);
+            var cell6 = row.insertCell(5);
+            cell1.innerHTML = '<i class="fa fa-long-arrow-down text-primary" aria-hidden="true"></i>';
+            cell2.innerHTML = '<input type="checkbox"/>';
+            cell3.innerHTML = '<i class="fa fa-user-o text-danger" aria-hidden="true"></i>';
+            cell4.innerHTML = taskName;
+            cell5.innerHTML = taskDescription;
+            cell6.innerHTML = '<button class="btn btn-info" onclick="editTask(this)">Edit</button> ' +
                 '<button class="btn btn-danger" onclick="deleteTask(this)">Delete</button>';
             // Clear inputs
             $('#taskModal').modal('hide');
@@ -88,12 +94,12 @@
 
         function editTask(button) {
             var row = button.parentNode.parentNode;
-            var taskName = row.cells[1].innerHTML;
+            var taskName = row.cells[3].innerHTML;
             document.getElementById('taskName').value = taskName;
             $('#taskModal').modal('show');
             // Save changes
             $('#taskModal').one('hide.bs.modal', function () {
-                row.cells[1].innerHTML = document.getElementById('taskName').value;
+                row.cells[3].innerHTML = document.getElementById('taskName').value;
             });
         }
 
@@ -104,6 +110,9 @@
             }
         }
 
+        function closeModal(){
+            $('#taskModal').modal('hide');
+        }
 
 
         $(document).ready(function () {

@@ -1,4 +1,5 @@
 ﻿using FoxPro.Data;
+using FoxPro.Enums;
 using FoxPro.Models;
 using FoxPro.Services.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -22,24 +23,46 @@ public class TaskListService : ITaskListService
         _context = context;
     }
 
-    public async Task LoadTasksAsync()
+    public async Task<List<Models.Task>> LoadTasksAsync()
     {
-        tasks = await _context.Tasks.OrderBy(t => t.DueDate).ToListAsync();
+        return await _context.Tasks.OrderBy(t => t.DueDate).ToListAsync();
     }
 
     public async Task AddTaskAsync(Models.Task task)
     {
-        _context.Tasks.Add(task);
-        await _context.SaveChangesAsync();
+        try {
+            task.Id = Guid.NewGuid().ToString();
+            _context.Tasks.Add(task);
+            await _context.SaveChangesAsync();
+
+        } catch (Exception ex)
+        {
+        }
     }
 
     public async Task UpdateTaskAsync(Models.Task task)
     {
-        _context.Tasks.Update(task);
-        await _context.SaveChangesAsync();
+        try {
+            _context.Tasks.Update(task);
+            await _context.SaveChangesAsync();
+        } catch (Exception ex) 
+        {
+
+        }
+        
+    }
+    public async Task UpdateStatusAsync(string id)
+    {
+        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+        if (task != null) {
+            task.Status = task.Status == 0 ? (int)StatusEnum.Complete : (int)StatusEnum.NotComplete;
+            _context.Tasks.Update(task);
+            await _context.SaveChangesAsync();
+        }
+        
     }
 
-    public async Task RemoveTaskAsync(int taskId)
+    public async Task RemoveTaskAsync(string taskId)
     {
         var task = await _context.Tasks.FindAsync(taskId);
         if (task != null) {

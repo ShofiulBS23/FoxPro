@@ -113,7 +113,7 @@
             function saveTask() {
                 var formData = new FormData($('#taskForm')[0]);
                 var jsonData = {};
-                debugger;
+
                 // Iterate over all form data entries
                 formData.forEach(function (value, key) {
                     if (key === "Filename") {
@@ -138,7 +138,7 @@
 
                 // Perform the fetch request to the specified endpoint
 
-                const id = $('Id').val();
+                const id = $('#Id').val();
                 let endpint = ''
                 if(!id){
                     endpint = '/Home/AddTask';

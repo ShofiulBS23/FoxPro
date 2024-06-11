@@ -1,4 +1,6 @@
 using FoxPro.Data;
+using FoxPro.Services.Implementation;
+using FoxPro.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 
 builder.Services.AddAutoMapper(typeof(Program));
 
+builder.Services.AddScoped<ITaskListService,TaskListService>();
 
 var app = builder.Build();
 

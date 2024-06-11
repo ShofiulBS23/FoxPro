@@ -1,13 +1,14 @@
 ﻿using FoxPro.Data;
 using FoxPro.Models;
+using FoxPro.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 using Task = System.Threading.Tasks.Task;
 
 namespace FoxPro.Services.Implementation;
 
-public class TaskListService
+public class TaskListService : ITaskListService
 {
-    private List<Models.Task> tasks = new List<Models.Task>();
+    public List<Models.Task> tasks = new List<Models.Task>();
     private string dataSource = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "foxtask.dbf");
     private string orderByField = "duedate";
     private bool orderAscending = true;
